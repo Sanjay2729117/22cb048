@@ -1,43 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Cards from '../Components/Cards'; // Assuming you have a Cards component
 
 const TopUsers = () => {
-  const [userData, setUserData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [userData, setUserData] = useState([]); // Store user data
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
   useEffect(() => {
     const fetchUserData = async () => {
+      const url = "https://20.244.56.144/test/users";
+      const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzQyNDU1ODM0LCJpYXQiOjE3NDI0NTU1MzQsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6ImQ1Njc4MzA5LWU0ZDQtNGQwMi04OWY5LWRiMzQ5YTBiMzYzNCIsInN1YiI6IjIyY2IwNDhAZHJuZ3BpdC5hYy5pbiJ9LCJjb21wYW55TmFtZSI6ImdvTWFydCIsImNsaWVudElEIjoiZDU2NzgzMDktZTRkNC00ZDAyLTg5ZjktZGIzNDlhMGIzNjM0IiwiY2xpZW50U2VjcmV0IjoiQ09raVJFVE1MVUFlbm5WTyIsIm93bmVyTmFtZSI6InNhbmpheSIsIm93bmVyRW1haWwiOiIyMmNiMDQ4QGRybmdwaXQuYWMuaW4iLCJyb2xsTm8iOiIyMmNiMDQ4In0.2aVqu8Ezm-wSMPZjt9SURhkl_1AtdWokbQ7k8rUkC3M";
+      
       try {
-        const response = await axios.get('https://20.244.56.144/test/users', {
+        const response = await fetch(url, {
+          method: "GET",
           headers: {
-            'Authorization': 'your-token-here', // Make sure your token is valid
-          }
+            "Authorization": `Bearer ${token}`, 
+            "Content-Type": "application/json", 
+          },
         });
 
-        console.log(response.data); // Log the data for debugging
+        // Check for response status and handle errors
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
 
-        // Assuming the response structure is something like:
-        // { users: { "1": "sam1", "2": "sam2", ... }}
-        
-        const users = Object.keys(response.data.users).map((id) => ({
+        const data = await response.json();
+        const users = Object.keys(data.users).map((id) => ({
           id,
-          name: response.data.users[id],
+          name: data.users[id],
         }));
 
-        setUserData(users); // Set the fetched user data
-      } catch (err) {
-        setError(err.message);
-        console.error('Error fetching user data:', err);
-      } finally {
-        setLoading(false); // Set loading state to false after data is fetched
+        setUserData(users); // Update the state with the fetched user data
+        setLoading(false); // Set loading to false after data is fetched
+        console.log(users); // Log users data for debugging
+      } catch (error) {
+        setError(error.message); // Set error message if any
+        console.error("Error fetching data:", error.message);
+        setLoading(false); // Ensure loading is stopped even if there's an error
       }
     };
 
-    fetchUserData();
-  }, []); // Empty dependency array means this will run once after initial render
+    fetchUserData(); // Call the async function to fetch data
+  }, []); // Empty dependency array means this runs only once after the first render
 
+  // Loading UI
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -46,6 +52,7 @@ const TopUsers = () => {
     );
   }
 
+  // Error UI
   if (error) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -57,15 +64,16 @@ const TopUsers = () => {
     );
   }
 
-  // Sorting the users by their `id` and getting the first 5
-  const sortedUsers = [...userData].sort((a, b) => a.id - b.id).slice(0, 5);
-
+  // Render user data
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Top Users</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedUsers.map((user) => (
-          <Cards key={user.id} name={user.name} />
+        {userData.map((user) => (
+          <div key={user.id} className="card">
+            <h2>{user.name}</h2>
+            {/* Render other user details if needed */}
+          </div>
         ))}
       </div>
     </div>
