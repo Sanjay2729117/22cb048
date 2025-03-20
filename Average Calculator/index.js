@@ -13,7 +13,6 @@ const serverUrl = {
 const windowSize = 10;
 let window = [];
 
-// Helper function to handle the calculation
 async function fetchData(source) {
     if (!(source in serverUrl)) {
         throw new Error("Invalid source");
@@ -45,7 +44,6 @@ async function fetchData(source) {
     }
 }
 
-// Define the route
 app.get("/calculate", async (req, res) => {
     const source = req.query.source;
 
@@ -56,13 +54,12 @@ app.get("/calculate", async (req, res) => {
             return res.status(400).json({ detail: "No valid numbers" });
         }
 
-        // Update the window with new numbers
         window = [...new Set([...window, ...num])];
         if (window.length > windowSize) {
             window = window.slice(-windowSize);
         }
 
-        // Calculate the average
+        
         const avg = window.reduce((acc, curr) => acc + curr, 0) / window.length;
 
         return res.json({
@@ -77,7 +74,6 @@ app.get("/calculate", async (req, res) => {
     }
 });
 
-// Start the server
 const port = 3000;
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
